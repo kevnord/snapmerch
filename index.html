@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <title>SnapMerch — Instant Custom Car Merch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: { DEFAULT: '#d97706', light: '#f59e0b', dark: '#b45309' },
+            electric: { DEFAULT: '#3b82f6', light: '#60a5fa', dark: '#2563eb' },
+            surface: { DEFAULT: '#0a0a0a', card: '#141414', elevated: '#1e1e1e', border: '#2a2a2a' },
+          },
+          animation: {
+            'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+            'slide-up': 'slide-up 0.4s ease-out',
+            'fade-in': 'fade-in 0.3s ease-out',
+          },
+          keyframes: {
+            'pulse-glow': {
+              '0%, 100%': { boxShadow: '0 0 20px rgba(217, 119, 6, 0.3)' },
+              '50%': { boxShadow: '0 0 40px rgba(217, 119, 6, 0.6)' },
+            },
+            'slide-up': {
+              '0%': { transform: 'translateY(100%)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
+            'fade-in': {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { 
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0a0a0a;
+      color: #e5e5e5;
+      overscroll-behavior: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    * { -webkit-touch-callout: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .shimmer {
+      background: linear-gradient(90deg, #1e1e1e 25%, #2a2a2a 50%, #1e1e1e 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    /* ── Art Generation Loading Effects ── */
+    @keyframes brush-sweep {
+      0% { transform: translateX(-100%) rotate(-2deg); opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { transform: translateX(200%) rotate(2deg); opacity: 0; }
+    }
+    @keyframes paint-drip {
+      0% { height: 0%; opacity: 0; }
+      15% { opacity: 0.6; }
+      100% { height: 100%; opacity: 0; }
+    }
+    @keyframes orbit {
+      0% { transform: rotate(0deg) translateX(28px) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(28px) rotate(-360deg); }
+    }
+    @keyframes color-cycle {
+      0%, 100% { color: #d97706; }
+      25% { color: #3b82f6; }
+      50% { color: #10b981; }
+      75% { color: #a855f7; }
+    }
+    @keyframes progress-glow {
+      0%, 100% { box-shadow: 0 0 8px rgba(217, 119, 6, 0.4); }
+      50% { box-shadow: 0 0 20px rgba(217, 119, 6, 0.8); }
+    }
+    @keyframes reveal-wipe {
+      0% { clip-path: inset(0 100% 0 0); }
+      100% { clip-path: inset(0 0 0 0); }
+    }
+    .art-reveal {
+      animation: reveal-wipe 0.6s ease-out forwards;
+    }
+    .orbit-dot {
+      animation: orbit 1.8s linear infinite;
+    }
+    .orbit-dot:nth-child(2) { animation-delay: -0.6s; }
+    .orbit-dot:nth-child(3) { animation-delay: -1.2s; }
+    .color-cycle { animation: color-cycle 4s ease-in-out infinite; }
+    .progress-bar-glow { animation: progress-glow 1.5s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
