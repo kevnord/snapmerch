@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import VendorMode from './components/VendorMode';
 import CustomerView from './components/CustomerView';
+import AuthGuard from './components/AuthGuard';
+import VendorHeader from './components/VendorHeader';
 
 type Route =
   | { type: 'vendor' }
   | { type: 'customer'; carId: string }
-  | { type: 'home' };
+  | { type: 'home' }
+  | { type: 'sign-up' };
 
 function parseHash(): Route {
   const hash = window.location.hash;
@@ -15,6 +18,9 @@ function parseHash(): Route {
   }
   if (hash === '#/vendor' || hash === '#/') {
     return { type: 'vendor' };
+  }
+  if (hash === '#/sign-up') {
+    return { type: 'sign-up' };
   }
   // Default: show home/landing that redirects to vendor
   return { type: 'home' };
@@ -78,5 +84,11 @@ export default function App() {
     return <CustomerView carSessionId={route.carId} />;
   }
 
-  return <VendorMode />;
+  // Vendor mode requires authentication
+  return (
+    <AuthGuard>
+      <VendorHeader />
+      <VendorMode />
+    </AuthGuard>
+  );
 }
