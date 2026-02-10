@@ -33,8 +33,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const startTime = Date.now();
     const quality = details.quality || 'high';
     // Vercel Hobby plan caps functions at 60s — use Flash for speed
-    // Flash typically generates in 15-30s vs Pro's 45-90s
-    const FLASH_MODEL = 'gemini-2.0-flash-exp-image-generation';
+    // gemini-2.0-flash-exp broke (RECITATION filter), upgraded to 2.5-flash-image
+    const FLASH_MODEL = 'gemini-2.5-flash-image';
     const model = FLASH_MODEL;
     const carIdentity = `${details.year || ''} ${details.make || ''} ${details.model || ''} ${details.trim || ''}`.trim();
 

@@ -3,12 +3,38 @@ import type { CarSession, SnapMerchStyle, OrderItem, Order } from '../types';
 import { STYLE_CONFIGS, PRODUCT_OPTIONS } from '../types';
 import { getCarSession, saveOrder, generateId } from '../services/storage';
 import { getPrioritizedStyles } from '../services/stylePriority';
+import { getTheme, toggleTheme, type Theme } from '../lib/theme';
 import StyleGrid from './StyleGrid';
 import ProductSelector from './ProductSelector';
 import OrderForm from './OrderForm';
 
 interface CustomerViewProps {
   carSessionId: string;
+}
+
+function CustomerThemeToggle() {
+  const [theme, setThemeState] = useState<Theme>(getTheme());
+  return (
+    <button
+      onClick={() => setThemeState(toggleTheme())}
+      className="absolute top-3 right-3 z-20 w-8 h-8 flex items-center justify-center rounded-full
+        bg-surface-card/80 backdrop-blur border border-surface-border
+        text-foreground-muted hover:text-foreground active:scale-90 transition-all"
+      aria-label="Toggle theme"
+    >
+      {theme === 'dark' ? (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      ) : (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round"
+            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      )}
+    </button>
+  );
 }
 
 export default function CustomerView({ carSessionId }: CustomerViewProps) {
@@ -70,16 +96,17 @@ export default function CustomerView({ carSessionId }: CustomerViewProps) {
   if (!car) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center px-6">
+        <CustomerThemeToggle />
         <div className="text-center space-y-4 max-w-sm">
           <div className="text-6xl">🚗</div>
-          <h1 className="text-white text-2xl font-bold">Design Not Found</h1>
-          <p className="text-neutral-400">
+          <h1 className="text-foreground text-2xl font-bold">Design Not Found</h1>
+          <p className="text-foreground-muted">
             This link may have expired or the design session has ended.
             Visit us at the next Cars & Coffee to get your custom merch!
           </p>
           <div className="pt-4">
             <span className="text-brand font-bold text-lg">SnapMerch</span>
-            <span className="text-neutral-500 text-sm block">by MyRestoMod</span>
+            <span className="text-foreground-muted text-sm block">by MyRestoMod</span>
           </div>
         </div>
       </div>
@@ -105,6 +132,7 @@ export default function CustomerView({ carSessionId }: CustomerViewProps) {
 
   return (
     <div className="min-h-screen bg-surface">
+      <CustomerThemeToggle />
       {/* Hero section */}
       <div className="relative">
         {/* Car photo */}
@@ -179,10 +207,10 @@ export default function CustomerView({ carSessionId }: CustomerViewProps) {
         <div className="text-center pt-8 pb-4 space-y-1">
           <div>
             <span className="text-brand font-black text-lg">Snap</span>
-            <span className="text-white font-black text-lg">Merch</span>
+            <span className="text-foreground font-black text-lg">Merch</span>
           </div>
-          <p className="text-neutral-500 text-xs">Custom car art by MyRestoMod</p>
-          <p className="text-neutral-600 text-xs">Premium print-on-demand · Ships in 5-7 days</p>
+          <p className="text-foreground-muted text-xs">Custom car art by MyRestoMod</p>
+          <p className="text-foreground-muted text-xs">Premium print-on-demand · Ships in 5-7 days</p>
         </div>
       </div>
     </div>

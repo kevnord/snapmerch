@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '@clerk/clerk-react';
 import VendorMode from './components/VendorMode';
 import CustomerView from './components/CustomerView';
 import AuthGuard from './components/AuthGuard';
 import VendorHeader from './components/VendorHeader';
+import { setAuthUserId } from './services/storage';
 
 type Route =
   | { type: 'vendor' }
@@ -26,6 +28,23 @@ function parseHash(): Route {
   return { type: 'home' };
 }
 
+/**
+ * Syncs Clerk auth userId to the storage layer for Supabase.
+ * Must be inside ClerkProvider + AuthGuard (only renders when signed in).
+ */
+function AuthSync() {
+  try {
+    const { userId } = useAuth();
+    useEffect(() => {
+      setAuthUserId(userId || null);
+      return () => setAuthUserId(null);
+    }, [userId]);
+  } catch {
+    // No ClerkProvider — no sync
+  }
+  return null;
+}
+
 export default function App() {
   const [route, setRoute] = useState<Route>(parseHash());
 
@@ -44,14 +63,14 @@ export default function App() {
           <div>
             <h1 className="text-5xl font-black tracking-tight">
               <span className="text-brand">Snap</span>
-              <span className="text-white">Merch</span>
+              <span className="text-foreground">Merch</span>
             </h1>
-            <p className="text-neutral-400 mt-2 text-lg">Instant Custom Car Merch</p>
+            <p className="text-foreground-muted mt-2 text-lg">Instant Custom Car Merch</p>
           </div>
 
           {/* Tagline */}
           <div className="space-y-2">
-            <p className="text-neutral-300 text-sm leading-relaxed">
+            <p className="text-foreground-muted text-sm leading-relaxed">
               Snap a photo of any car → AI creates stunning art in 4 styles → 
               Customer picks products → Ships to their door.
             </p>
@@ -72,7 +91,7 @@ export default function App() {
           </div>
 
           {/* Branding */}
-          <p className="text-neutral-600 text-xs pt-4">
+          <p className="text-foreground-muted text-xs pt-4">
             Powered by MyRestoMod · AI-generated car art
           </p>
         </div>
@@ -87,6 +106,7 @@ export default function App() {
   // Vendor mode requires authentication
   return (
     <AuthGuard>
+      <AuthSync />
       <VendorHeader />
       <VendorMode />
     </AuthGuard>

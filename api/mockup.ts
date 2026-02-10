@@ -6,7 +6,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
 import { trackImageGenCall } from '../lib/apiTracker.js';
 
-const MODEL = 'gemini-2.0-flash-exp-image-generation';
+const MODEL = 'gemini-2.5-flash-image';
 
 const extractImageFromResponse = (response: any): string => {
   const parts = response.candidates?.[0]?.content?.parts || [];

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -20,7 +20,16 @@
           colors: {
             brand: { DEFAULT: '#d97706', light: '#f59e0b', dark: '#b45309' },
             electric: { DEFAULT: '#3b82f6', light: '#60a5fa', dark: '#2563eb' },
-            surface: { DEFAULT: '#0a0a0a', card: '#141414', elevated: '#1e1e1e', border: '#2a2a2a' },
+            surface: {
+              DEFAULT: 'var(--surface)',
+              card: 'var(--surface-card)',
+              elevated: 'var(--surface-elevated)',
+              border: 'var(--surface-border)',
+            },
+            foreground: {
+              DEFAULT: 'var(--foreground)',
+              muted: 'var(--foreground-muted)',
+            },
           },
           animation: {
             'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
@@ -46,10 +55,32 @@
     };
   </script>
   <style>
+    /* ── Theme Variables ── */
+    :root, [data-theme="dark"] {
+      --surface: #0a0a0a;
+      --surface-card: #141414;
+      --surface-elevated: #1e1e1e;
+      --surface-border: #2a2a2a;
+      --foreground: #e5e5e5;
+      --foreground-muted: #a3a3a3;
+      --shimmer-from: #1e1e1e;
+      --shimmer-to: #2a2a2a;
+    }
+    [data-theme="light"] {
+      --surface: #fafafa;
+      --surface-card: #ffffff;
+      --surface-elevated: #f0f0f0;
+      --surface-border: #e0e0e0;
+      --foreground: #1a1a1a;
+      --foreground-muted: #555555;
+      --shimmer-from: #e5e5e5;
+      --shimmer-to: #d5d5d5;
+    }
+
     body { 
       font-family: 'Inter', system-ui, sans-serif;
-      background: #0a0a0a;
-      color: #e5e5e5;
+      background: var(--surface);
+      color: var(--foreground);
       overscroll-behavior: none;
       -webkit-tap-highlight-color: transparent;
     }
@@ -62,10 +93,55 @@
       100% { background-position: 200% 0; }
     }
     .shimmer {
-      background: linear-gradient(90deg, #1e1e1e 25%, #2a2a2a 50%, #1e1e1e 75%);
+      background: linear-gradient(90deg, var(--shimmer-from) 25%, var(--shimmer-to) 50%, var(--shimmer-from) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
     }
+
+    /* ── Light mode text adjustments ── */
+    /* Flip neutral grays that Tailwind generates as fixed hex values */
+    [data-theme="light"] .text-white { color: #1a1a1a; }
+    [data-theme="light"] .text-white\/70 { color: rgba(26,26,26,0.7); }
+    [data-theme="light"] .text-white\/80 { color: rgba(26,26,26,0.8); }
+    [data-theme="light"] .text-neutral-200 { color: #404040; }
+    [data-theme="light"] .text-neutral-300 { color: #525252; }
+    [data-theme="light"] .text-neutral-400 { color: #6b6b6b; }
+    [data-theme="light"] .text-neutral-500 { color: #888888; }
+    [data-theme="light"] .text-neutral-600 { color: #a0a0a0; }
+    [data-theme="light"] .border-white\/20 { border-color: rgba(26,26,26,0.2); }
+    [data-theme="light"] .border-white\/30 { border-color: rgba(26,26,26,0.3); }
+    /* Input text stays dark on light surface-elevated backgrounds */
+    [data-theme="light"] input.text-white { color: #1a1a1a; }
+    /* Placeholder text */
+    [data-theme="light"] .placeholder-neutral-500::placeholder { color: #999; }
+
+    /* Keep text-white on elements that have dark/colored backgrounds */
+    [data-theme="light"] .bg-gradient-to-r .text-white,
+    [data-theme="light"] .bg-gradient-to-br .text-white,
+    [data-theme="light"] .bg-brand .text-white,
+    [data-theme="light"] .bg-electric .text-white,
+    [data-theme="light"] .bg-emerald-600 .text-white,
+    [data-theme="light"] .from-brand .text-white,
+    [data-theme="light"] .from-brand .text-white\/80,
+    [data-theme="light"] [class*="from-black"] .text-white,
+    [data-theme="light"] [class*="from-black"] .text-white\/70 { color: #ffffff !important; }
+    [data-theme="light"] .bg-brand.text-white { color: #ffffff !important; }
+    /* Buttons with explicit gradients or dark backgrounds */
+    [data-theme="light"] button.bg-gradient-to-r > .text-white,
+    [data-theme="light"] button[class*="from-brand"] .text-white,
+    [data-theme="light"] a[class*="from-brand"] .text-white { color: #ffffff !important; }
+    /* Elements that explicitly use white text on colored bg */
+    [data-theme="light"] .bg-brand span.text-white,
+    [data-theme="light"] .bg-brand-dark span.text-white { color: #ffffff !important; }
+
+    /* Gradient text containers - keep white on dark overlays */
+    [data-theme="light"] .bg-gradient-to-t span.text-white,
+    [data-theme="light"] .bg-gradient-to-t .text-white { color: #ffffff !important; }
+    [data-theme="light"] .bg-gradient-to-b .text-white { color: #ffffff !important; }
+
+    /* Black overlays stay dark in light mode */
+    [data-theme="light"] .bg-black\/60 { background: rgba(0,0,0,0.6); }
+    [data-theme="light"] .bg-black\/80 { background: rgba(0,0,0,0.8); }
 
     /* ── Art Generation Loading Effects ── */
     @keyframes brush-sweep {
