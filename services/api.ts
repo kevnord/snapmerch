@@ -67,7 +67,7 @@ function compressDesignImage(base64: string, maxWidth = 600, quality = 0.70): Pr
   });
 }
 
-export async function generateArt(
+async function generateArt(
   identity: CarIdentity,
   styleConfig: StyleConfig,
   referenceImage?: string

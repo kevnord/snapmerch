@@ -96,16 +96,4 @@ export function getPrioritizedStyles(identity: CarIdentity): StyleConfig[] {
   return ordered;
 }
 
-/**
- * Get the first N priority styles for initial auto-generation.
- */
-export function getInitialStyles(identity: CarIdentity, count = 4): StyleConfig[] {
-  return getPrioritizedStyles(identity).slice(0, count);
-}
 
-/**
- * Get the next batch of styles after the initial ones.
- */
-export function getMoreStyles(identity: CarIdentity, initialCount = 4, batchSize = 4): StyleConfig[] {
-  return getPrioritizedStyles(identity).slice(initialCount, initialCount + batchSize);
-}

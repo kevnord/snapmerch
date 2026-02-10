@@ -14,7 +14,7 @@ export function getTheme(): Theme {
   return 'dark';
 }
 
-export function setTheme(theme: Theme): void {
+function setTheme(theme: Theme): void {
   try {
     localStorage.setItem(STORAGE_KEY, theme);
   } catch {}

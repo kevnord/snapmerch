@@ -2,44 +2,13 @@
 // Shared style helpers used by multiple API functions (generate, edit, style).
 // Ported exactly from services/geminiService.ts getStyleInstruction().
 
-export interface CarDetailsForStyle {
+interface CarDetailsForStyle {
   artStyle: string;
   color?: string;
   backgroundColor?: string;
   view?: string;
   cyanotypeInverted?: boolean;
 }
-
-export const STYLE_DESCRIPTIONS: Record<string, string> = {
-  'Vector (Monochromatic)': 'Clean, minimalist 2D illustration using shades of a single color.',
-  'Watercolor': 'Expressive painting with soft edges, bleeds, and artistic splatters.',
-  'Neon Sign': 'Electric glowing tubes and vibrant light trails on a dark canvas.',
-  'Anime': '90s automotive manga style with thick outlines and cell shading.',
-  'Vintage Poster': 'Mid-century travel aesthetic with graphic shapes and elegant palettes.',
-  'Distressed': 'Aged retro look with worn textures and faded edges.',
-  'Pop Art': '1960s comic book style with bold halftone dots and high contrast.',
-  'Sketch': 'Hand-drawn pencil and charcoal aesthetic with visible graphite strokes.',
-  'Chalk': 'Dusty, hand-drawn look on a chalkboard background with soft highlights.',
-  'Cyanotype': 'Classic Prussian Blue blueprint look with precise technical lines.',
-  'Vector': 'Clean, flat professional minimalist 2D illustration.',
-  'Blueprint': 'Technical drafting schematic with precise white or blue lines.',
-  'Blueprint Style': 'Technical drafting blueprint with white lines on dark blue, schematic engineering feel.',
-  'Synthwave': '80s retro-futurism with chrome reflections and neon glows.',
-  'Synthwave 80s': '80s synthwave neon grid with sunset gradient, retrowave chrome reflections.',
-  'Comic Book': 'Bold comic book style with thick outlines, halftone dots, explosive energy and POW feel.',
-  'Pencil Sketch': 'Detailed graphite pencil drawing with realistic shading and cross-hatching.',
-  'Lowrider Airbrush': 'Chicano lowrider airbrush art style with metallic flake, custom paint swirls, and street culture aesthetic.',
-  'JDM Japanese': 'Japanese car culture style with drift aesthetic, kanji typography, and neon-lit Tokyo street vibes.',
-  'Cyberpunk': 'Futuristic rainy tech aesthetic with intense pink and cyan lights.',
-  'Vaporwave': 'Lo-fi 90s aesthetic with pastel gradients and glitch elements.',
-  'Line-Art': 'Minimalist ink drawing using only single-weight clean lines.',
-  'Oil Painting': 'Richly textured masterpiece with visible impasto brush strokes.',
-  'Low Poly': '3D geometric art constructed from sharp angular facets.',
-  'Ukiyo-e': 'Traditional Japanese woodblock print with delicate organic textures.',
-  'Carbon Tech': 'High-tech industrial look featuring intricate carbon fiber weaves.',
-  'Lego': 'Constructed entirely from vibrant interlocking plastic building bricks.',
-  'Exploded View': 'Technical diagram showing components pulled apart along axes.',
-};
 
 export const getStyleInstruction = (details: CarDetailsForStyle): string => {
   const { artStyle, color, backgroundColor, view, cyanotypeInverted } = details;

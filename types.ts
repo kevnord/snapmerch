@@ -37,9 +37,6 @@ export const STYLE_CONFIGS: StyleConfig[] = [
   { id: 'japanese', label: 'JDM Style', emoji: '🗾', artStyle: 'JDM Japanese', backgroundColor: '#000000' },
 ];
 
-/** Default order of all style IDs */
-export const ALL_STYLE_IDS: SnapMerchStyle[] = STYLE_CONFIGS.map(c => c.id);
-
 export interface GeneratedStyle {
   styleId: SnapMerchStyle;
   imageUrl: string | null;

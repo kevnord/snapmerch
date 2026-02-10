@@ -16,11 +16,6 @@ export function setAuthUserId(userId: string | null): void {
   _userId = userId;
 }
 
-/** Get the current user ID. */
-export function getAuthUserId(): string | null {
-  return _userId;
-}
-
 // ── Event Session ───────────────────────────────────────────────────────
 
 export function getEventSession(): EventSession {
@@ -57,7 +52,7 @@ function isLargeDataUrl(s: string | null | undefined): boolean {
   return s.startsWith('data:') && s.length > 500;
 }
 
-export function saveEventSession(session: EventSession): void {
+function saveEventSession(session: EventSession): void {
   // Strip ALL large base64 data before saving to localStorage (5MB limit)
   const stripped: EventSession = {
     ...session,
@@ -128,7 +123,7 @@ export function getCarSession(carId: string): CarSession | null {
 
 // ── Orders ──────────────────────────────────────────────────────────────
 
-export function getOrders(): Order[] {
+function getOrders(): Order[] {
   const stored = localStorage.getItem(KEYS.ORDERS);
   return stored ? JSON.parse(stored) : [];
 }
@@ -255,108 +250,4 @@ async function syncOrderToSupabase(order: Order): Promise<void> {
   }
 }
 
-/**
- * Load event session from Supabase (if authenticated).
- * Falls back to localStorage on error.
- */
-export async function loadEventFromSupabase(): Promise<EventSession | null> {
-  const supabase = getSupabase();
-  if (!supabase || !_userId) return null;
 
-  try {
-    const today = new Date().toISOString().split('T')[0];
-    const { data: events, error: evError } = await supabase
-      .from('snap_events')
-      .select('*')
-      .eq('user_id', _userId)
-      .eq('date', today)
-      .order('created_at', { ascending: false })
-      .limit(1);
-
-    if (evError || !events || events.length === 0) return null;
-    const ev = events[0];
-
-    // Load cars
-    const { data: cars, error: carsError } = await supabase
-      .from('snap_cars')
-      .select('*')
-      .eq('event_id', ev.id)
-      .order('created_at', { ascending: false });
-
-    if (carsError || !cars) return null;
-
-    // Load styles for all cars
-    const carIds = cars.map(c => c.id);
-    const { data: allStyles } = await supabase
-      .from('snap_styles')
-      .select('*')
-      .in('car_id', carIds.length > 0 ? carIds : ['__none__']);
-
-    const stylesMap = new Map<string, any[]>();
-    for (const s of (allStyles || [])) {
-      if (!stylesMap.has(s.car_id)) stylesMap.set(s.car_id, []);
-      stylesMap.get(s.car_id)!.push(s);
-    }
-
-    // Load orders
-    const { data: allOrders } = await supabase
-      .from('snap_orders')
-      .select('*')
-      .in('car_id', carIds.length > 0 ? carIds : ['__none__']);
-
-    const ordersMap = new Map<string, any[]>();
-    for (const o of (allOrders || [])) {
-      if (!ordersMap.has(o.car_id)) ordersMap.set(o.car_id, []);
-      ordersMap.get(o.car_id)!.push(o);
-    }
-
-    // Build EventSession
-    const session: EventSession = {
-      id: ev.id,
-      name: ev.name,
-      date: ev.date,
-      cars: cars.map(car => {
-        const dbStyles = stylesMap.get(car.id) || [];
-        const dbOrders = ordersMap.get(car.id) || [];
-        return {
-          id: car.id,
-          photoBase64: '',
-          photoThumbnail: car.photo_thumbnail || '',
-          identity: car.identity || null,
-          shareUrl: car.share_url || undefined,
-          styles: dbStyles.map(s => ({
-            styleId: s.style_id,
-            imageUrl: s.image_url || '',
-            status: s.status || 'idle',
-            error: s.error || undefined,
-          })),
-          mockups: [],
-          orders: dbOrders.map(o => ({
-            id: o.id,
-            carSessionId: o.car_id,
-            items: o.items || [],
-            customerEmail: o.customer_email,
-            customerName: o.customer_name || undefined,
-            customerPhone: o.customer_phone || undefined,
-            shippingAddress: o.shipping_address || undefined,
-            paymentId: o.payment_id || undefined,
-            status: o.status,
-            createdAt: new Date(o.created_at).getTime(),
-          })),
-          createdAt: new Date(car.created_at).getTime(),
-        };
-      }),
-      createdAt: new Date(ev.created_at).getTime(),
-    };
-
-    // Also update localStorage with the Supabase data
-    try {
-      localStorage.setItem(KEYS.EVENT_SESSION, JSON.stringify(session));
-    } catch {}
-
-    return session;
-  } catch (err) {
-    console.warn('Supabase load failed, using localStorage:', err);
-    return null;
-  }
-}

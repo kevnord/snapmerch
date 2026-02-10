@@ -6,7 +6,7 @@ const TRACKER_URL = process.env.TRACKER_URL || '';
 
 // ── Types ──────────────────────────────────────────────────────────────
 
-export interface ApiUsageLog {
+interface ApiUsageLog {
   app: string;
   model: string;
   operation: string;
@@ -33,7 +33,7 @@ const GEMINI_PRICING: Record<string, { input: number; output: number; imageGen?:
 
 const IMAGE_COST_PER_IMAGE = 0.04;
 
-export function estimateGeminiCost(
+function estimateGeminiCost(
   model: string,
   inputTokens: number,
   outputTokens: number,
@@ -46,7 +46,7 @@ export function estimateGeminiCost(
   return inputCost + outputCost + imageCost;
 }
 
-export function estimateImageGenCost(imageCount: number, model = 'gemini-2.0-flash'): number {
+function estimateImageGenCost(imageCount: number, model = 'gemini-2.0-flash'): number {
   const pricing = GEMINI_PRICING[model];
   const perImage = pricing?.imageGen || IMAGE_COST_PER_IMAGE;
   return imageCount * perImage;
@@ -54,7 +54,7 @@ export function estimateImageGenCost(imageCount: number, model = 'gemini-2.0-fla
 
 // ── Main Tracker ───────────────────────────────────────────────────────
 
-export function trackApiCall(log: ApiUsageLog): void {
+function trackApiCall(log: ApiUsageLog): void {
   if (!TRACKER_URL) return;
   try {
     fetch(TRACKER_URL, {
