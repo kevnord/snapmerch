@@ -8,7 +8,7 @@ import { getStyleInstruction } from '../lib/styleHelpers.js';
 import { trackImageGenCall } from '../lib/apiTracker.js';
 import { requireAuth } from './_lib/auth.js';
 import { validateDesignInput, sanitizeError, logError } from './_lib/validation.js';
-import { checkRateLimit } from './_lib/rateLimit.js';
+import { rateLimit } from './_lib/ratelimit.js';
 
 const extractImageFromResponse = (response: any): string => {
   const parts = response.candidates?.[0]?.content?.parts || [];
@@ -23,7 +23,7 @@ const extractImageFromResponse = (response: any): string => {
 };
 
 async function generateHandler(req: VercelRequest, res: VercelResponse, user: any) {
-  if (!(await checkRateLimit(req, res, 'ai'))) return;
+  if (!(await rateLimit(req, res, 'ai', user.sub))) return;
   
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 

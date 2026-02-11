@@ -3,10 +3,10 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI, Type } from '@google/genai';
 import { requireAuth } from './_lib/auth.js';
 import { sanitizeError, logError } from './_lib/validation.js';
-import { checkRateLimit } from './_lib/rateLimit.js';
+import { rateLimit } from './_lib/ratelimit.js';
 
 async function identifyColorHandler(req: VercelRequest, res: VercelResponse, user: any) {
-  if (!(await checkRateLimit(req, res, 'ai'))) return;
+  if (!(await rateLimit(req, res, 'ai', user.sub))) return;
   
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 

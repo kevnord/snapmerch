@@ -7,10 +7,10 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { trackGeminiCall } from '../lib/apiTracker.js';
 import { requireAuth } from './_lib/auth.js';
 import { sanitizeError, logError } from './_lib/validation.js';
-import { checkRateLimit } from './_lib/rateLimit.js';
+import { rateLimit } from './_lib/ratelimit.js';
 
 async function analyzeHandler(req: VercelRequest, res: VercelResponse, user: any) {
-  if (!(await checkRateLimit(req, res, 'ai'))) return;
+  if (!(await rateLimit(req, res, 'ai', user.sub))) return;
   
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 

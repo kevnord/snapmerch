@@ -7,7 +7,7 @@ import { GoogleGenAI } from '@google/genai';
 import { trackImageGenCall } from '../lib/apiTracker.js';
 import { requireAuth } from './_lib/auth.js';
 import { sanitizeError, logError } from './_lib/validation.js';
-import { checkRateLimit } from './_lib/rateLimit.js';
+import { rateLimit } from './_lib/ratelimit.js';
 
 const MODEL = 'gemini-2.5-flash-image';
 
@@ -77,7 +77,7 @@ IMPORTANT: This is for ${carDescription || 'automotive art'}. The design must fa
 }
 
 async function mockupHandler(req: VercelRequest, res: VercelResponse, user: any) {
-  if (!(await checkRateLimit(req, res, 'ai'))) return;
+  if (!(await rateLimit(req, res, 'ai', user.sub))) return;
   
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
