@@ -1,4 +1,4 @@
-// api/generate.ts — Generate car image
+// api/generate.ts — Generate car image (AUTHENTICATED)
 // POST { details } → returns { imageUrl, prompt }
 // NOTE: Large base64 reference images may exceed Vercel's 4.5MB body limit
 
@@ -6,6 +6,9 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
 import { getStyleInstruction } from '../lib/styleHelpers.js';
 import { trackImageGenCall } from '../lib/apiTracker.js';
+import { requireAuth } from './_lib/auth.js';
+import { validateDesignInput, sanitizeError, logError } from './_lib/validation.js';
+import { checkRateLimit } from './_lib/rateLimit.js';
 
 const extractImageFromResponse = (response: any): string => {
   const parts = response.candidates?.[0]?.content?.parts || [];
@@ -13,18 +16,29 @@ const extractImageFromResponse = (response: any): string => {
   if (imagePart && imagePart.inlineData) {
     return `data:image/png;base64,${imagePart.inlineData.data}`;
   }
-  // Log what we actually got back for debugging
+  // Log what we actually got back for debugging (server-side only)
   console.error('No image in response. Parts:', JSON.stringify(parts?.map((p: any) => ({ hasText: !!p.text, hasInlineData: !!p.inlineData, textPreview: p.text?.slice(0, 200) })), null, 2));
   console.error('Candidates:', JSON.stringify(response.candidates?.map((c: any) => ({ finishReason: c.finishReason, safetyRatings: c.safetyRatings })), null, 2));
   throw new Error('The design studio failed to render the image. Please try again.');
 };
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function generateHandler(req: VercelRequest, res: VercelResponse, user: any) {
+  if (!(await checkRateLimit(req, res, 'ai'))) return;
+  
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
     const { details } = req.body;
     if (!details) return res.status(400).json({ error: 'details object is required' });
+
+    // Validate input
+    const validationErrors = validateDesignInput(details);
+    if (validationErrors.length > 0) {
+      return res.status(400).json({ 
+        error: 'Invalid input', 
+        validationErrors 
+      });
+    }
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
@@ -92,7 +106,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({ imageUrl, prompt: promptText });
   } catch (err: any) {
-    console.error('generate error:', err);
-    return res.status(500).json({ error: err.message || 'Generation failed' });
+    logError('generate', err, { userId: user.sub });
+    return res.status(500).json({ error: sanitizeError(err) });
   }
 }
+
+export default requireAuth(generateHandler);

@@ -1,10 +1,13 @@
-// api/edit.ts — Edit/tweak a generated car design
+// api/edit.ts — Edit/tweak a generated car design (AUTHENTICATED)
 // POST { imageBase64, editPrompt, resolution, details } → returns { imageUrl, prompt }
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
 import { getStyleInstruction } from '../lib/styleHelpers.js';
 import { trackImageGenCall } from '../lib/apiTracker.js';
+import { requireAuth } from './_lib/auth.js';
+import { sanitizeError, logError } from './_lib/validation.js';
+import { checkRateLimit } from './_lib/rateLimit.js';
 
 const extractImageFromResponse = (response: any): string => {
   const parts = response.candidates?.[0]?.content?.parts || [];
@@ -15,7 +18,9 @@ const extractImageFromResponse = (response: any): string => {
   throw new Error('The design studio failed to render the image. Please try again.');
 };
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function editHandler(req: VercelRequest, res: VercelResponse, user: any) {
+  if (!(await checkRateLimit(req, res, 'ai'))) return;
+  
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
@@ -50,7 +55,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({ imageUrl, prompt });
   } catch (err: any) {
-    console.error('edit error:', err);
-    return res.status(500).json({ error: err.message || 'Edit failed' });
+    logError('edit', err, { userId: user.sub });
+    return res.status(500).json({ error: sanitizeError(err) });
   }
 }
+
+export default requireAuth(editHandler);

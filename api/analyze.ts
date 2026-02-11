@@ -1,12 +1,17 @@
-// api/analyze.ts — Vehicle analysis
+// api/analyze.ts — Vehicle analysis (AUTHENTICATED)
 // POST { imageBase64 } → returns VehicleAnalysis JSON
 // NOTE: Large base64 images may exceed Vercel's 4.5MB body limit
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI, Type } from '@google/genai';
 import { trackGeminiCall } from '../lib/apiTracker.js';
+import { requireAuth } from './_lib/auth.js';
+import { sanitizeError, logError } from './_lib/validation.js';
+import { checkRateLimit } from './_lib/rateLimit.js';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function analyzeHandler(req: VercelRequest, res: VercelResponse, user: any) {
+  if (!(await checkRateLimit(req, res, 'ai'))) return;
+  
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
@@ -53,7 +58,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const result = JSON.parse(response.text as string);
     return res.status(200).json(result);
   } catch (err: any) {
-    console.error('analyze error:', err);
-    return res.status(500).json({ error: err.message || 'Analysis failed' });
+    logError('analyze', err, { userId: user.sub });
+    return res.status(500).json({ error: sanitizeError(err) });
   }
 }
+
+export default requireAuth(analyzeHandler);

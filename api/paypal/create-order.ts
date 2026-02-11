@@ -3,6 +3,7 @@
 // → returns { orderId }
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { checkRateLimit } from '../_lib/rateLimit.js';
 
 const PAYPAL_API = process.env.PAYPAL_MODE === 'live'
   ? 'https://api-m.paypal.com'
@@ -33,6 +34,8 @@ async function getAccessToken(): Promise<string> {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (!(await checkRateLimit(req, res, 'sensitive'))) return;
+  
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {

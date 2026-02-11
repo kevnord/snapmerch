@@ -1,10 +1,13 @@
-// api/mockup.ts — Generate product mockup (T-shirt, Hoodie, Mug, Poster)
+// api/mockup.ts — Generate product mockup (T-shirt, Hoodie, Mug, Poster) (AUTHENTICATED)
 // POST { designImageBase64, productType?, shirtColor, shirtColorName, shirtBrand, gender, ageRange, carDescription, modelPhotoBase64?, background? }
 // → returns { imageUrl }
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
 import { trackImageGenCall } from '../lib/apiTracker.js';
+import { requireAuth } from './_lib/auth.js';
+import { sanitizeError, logError } from './_lib/validation.js';
+import { checkRateLimit } from './_lib/rateLimit.js';
 
 const MODEL = 'gemini-2.5-flash-image';
 
@@ -73,7 +76,9 @@ ${modelNote}
 IMPORTANT: This is for ${carDescription || 'automotive art'}. The design must faithfully reproduce the first reference image.`;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+async function mockupHandler(req: VercelRequest, res: VercelResponse, user: any) {
+  if (!(await checkRateLimit(req, res, 'ai'))) return;
+  
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
@@ -150,7 +155,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({ imageUrl });
   } catch (err: any) {
-    console.error('mockup error:', err);
-    return res.status(500).json({ error: err.message || 'Mockup generation failed' });
+    logError('mockup', err, { userId: user.sub });
+    return res.status(500).json({ error: sanitizeError(err) });
   }
 }
+
+export default requireAuth(mockupHandler);
